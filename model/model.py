@@ -1,43 +1,66 @@
 import networkx as nx
-
 from database.DAO import DAO
-from model.arco import Arco
 
 
 class Model:
     def __init__(self):
-        self._graph = None
         self._idProducts = {}
+        self._graph = None
+        self._edges = None
+        self.percorso = 0
 
-    def getColori(self):
-        colors = DAO.getColori()
-        colors.sort()
-        return colors
+    def getColors(self):
+        return DAO.getColors()
 
-    def buildGraph(self, y, c):
+    def buildGraph(self, color, year):
         self._graph = nx.Graph()
-        nodes = DAO.getAllNodes(c)
-        self._graph.add_nodes_from(nodes)
-        for n in nodes:
-            self._idProducts[n.Product_number] = n
-        edges = DAO.getAllEdges(self._idProducts, y, c)
-        for e in edges:
-            if self._graph.has_edge(e.p1, e.p2):
-                self._graph[e.p1][e.p2]["weight"]+=e.peso
-            else:
-                self._graph.add_edge(e.p1,e.p2,weight=e.peso)
-        print(self._graph.number_of_edges())
+        self._graph.add_nodes_from(self.getAllProducts(color))
+        self.getAllEdges(color, year)
 
-    def infoGraph(self):
-        return self._graph.number_of_nodes, self._graph.number_of_edges
+    def getAllProducts(self, color):
+        plist = DAO.getAllProducts(color)
+        for p in plist:
+            self._idProducts[p.Product_number] = p
+        return plist
 
-    def archiPeso(self):
-        archi = []
-        for u in self._graph.nodes():
-            for v in self._graph.nodes():
-                archi.append((u,v,self._graph[u][v]["weight"]))
-        archi.sort(key=lambda x: x[2], reverse = True)
-        return archi
+    def getAllEdges(self, color, year):
+        self._edges =  DAO.getAllEdges(color, year, self._idProducts)
+        for e in self._edges:
+            self._graph.add_edge(e.p1, e.p2, weight=e.weight)
 
+    def getNumNodesEdges(self):
+        return self._graph.number_of_nodes(), self._graph.number_of_edges()
 
+    def getListEdges(self):
+        return self._edges
 
+    def getPercorso(self, nodo):
+        pass
+
+    def ricorsione(self, parziale, nodo):
+        if self.fine(parziale, nodo):
+            if len(parziale) > self.percorso:
+                self.percorso = len(parziale)
+        else:
+            for n in self._graph.neighbors(nodo):
+                if self.condizione(parziale, nodo, n):
+                    parziale.append((nodo, n, self._graph[nodo][n]["weight"]))
+                    self.ricorsione(parziale, n)
+                    parziale.pop()
+
+    def condizione(self, parziale, nodo, n):
+        if len(parziale) == 0:
+            return True
+        ultimoPeso = parziale[-1][2]
+        if ultimoPeso <= self._graph[nodo][n]["weight"] and parziale[-1][0] != n:
+            return True
+        return False
+
+    def fine(self, parziale, nodo):
+        if len(parziale) == 0:
+            return False
+        for n in self._graph.neighbors(nodo):
+            ultimoPeso = parziale[-1][2]
+            if ultimoPeso < self._graph[nodo][n]["weight"]:
+                return False
+        return True

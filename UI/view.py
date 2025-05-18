@@ -31,7 +31,9 @@ class View(ft.UserControl):
         #ROW with some controls
         # text field for the name
         self._ddyear = ft.Dropdown(label="Anno")
+        self._controller.fillYears()
         self._ddcolor = ft.Dropdown(label="Colore")
+        self._controller.fillColors()
 
         # button for the "creat graph" reply
         self.btn_graph = ft.ElevatedButton(text="Crea Grafo", on_click=self._controller.handle_graph)

@@ -19,4 +19,4 @@ class Product:
         return hash(self.Product_number)
 
     def __str__(self):
-        return self.Product_number
+        return f"{self.Product_number}"
