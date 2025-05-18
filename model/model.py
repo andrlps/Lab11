@@ -35,7 +35,8 @@ class Model:
         return self._edges
 
     def getPercorso(self, nodo):
-        pass
+        self.ricorsione([], nodo)
+        return self.percorso
 
     def ricorsione(self, parziale, nodo):
         if self.fine(parziale, nodo):
@@ -64,3 +65,4 @@ class Model:
             if ultimoPeso < self._graph[nodo][n]["weight"]:
                 return False
         return True
+

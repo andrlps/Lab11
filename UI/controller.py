@@ -43,10 +43,12 @@ class Controller:
     def handle_search(self, e):
         self._view.txtOut2.controls.clear()
         if self._p is None:
-            self._view.txtOut.controls.append(ft.Text("Selezionare un prodotto", color="red"))
+            self._view.txtOut2.controls.append(ft.Text("Selezionare un prodotto", color="red"))
             self._view.update_page()
             return
-
+        percorso = self._model.getPercorso(self._p)
+        self._view.txtOut2.controls.append(ft.Text(f"Percorso con più archi: {percorso}"))
+        self._view.update_page()
 
 
     def fillYears(self):
